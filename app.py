@@ -1,5 +1,5 @@
 #!flask/bin/python
-from flask import Flask,jsonify,abort,request
+from flask import Flask,jsonify,abort,request, url_for
 
 app = Flask(__name__)
 
@@ -19,10 +19,23 @@ tasks = [
         'done': True
     }
 ]
+'''
+change the path to whatever - placeholder path used from tutorial on
+http://blog.miguelgrinberg.com/post/designing-a-restful-api-with-python-and-flask
+'''
+
+def make_public_task(task):
+    new_task = {}
+    for field in task:
+        if field == 'id':
+            new_task['uri'] = url_for('get_task',task_id = task['id'], _external= True)
+        else:
+            new_task[field] = task[field]
+    return new_task
 
 @app.route('/nilas/api/v1.0/tasks',methods =['GET'])
 def get_tasks():
-    return jsonify({'tasks':tasks})
+    return jsonify({'tasks':map(make_public_task,tasks)})
 
 
 @app.route('/nilas/api/v1.0/tasks/<int:task_id>',methods =['GET'])
@@ -80,6 +93,7 @@ def delete_task(task_id):
         abort(404)
     tasks.remove(task[0])
     return jsonify({'result':True})
+
 
     
     
