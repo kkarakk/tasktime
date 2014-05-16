@@ -52,7 +52,7 @@ def create_task():
     tasks.append(task)
     return jsonify({'task':task}),201
 
-@app.route('/todo/api/v1.0/tasks/<int:task_id>',methods = ['PUT'])
+@app.route('/nilas/api/v1.0/tasks/<int:task_id>',methods = ['PUT'])
 def update_task(task_id):
     task=filter(lambda t:t['id'] == task_id,tasks)
     if(len(task)==0):
