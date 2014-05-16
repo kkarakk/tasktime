@@ -1,5 +1,18 @@
 #!flask/bin/python
 from flask import Flask,jsonify,abort,request, url_for
+from flask.ext.httpauth import HTTPBasicAuth
+
+auth = HTTPBasicAuth()
+
+@auth.get_password
+def get_password(username):
+    if username == 'karan':
+        return 'python'
+    return None
+
+@auth.error_handler
+def unauthorized():
+    return jsonify({'error':'Unauthorized access'})#,401
 
 app = Flask(__name__)
 
@@ -34,6 +47,7 @@ def make_public_task(task):
     return new_task
 
 @app.route('/nilas/api/v1.0/tasks',methods =['GET'])
+@auth.login_required
 def get_tasks():
     return jsonify({'tasks':map(make_public_task,tasks)})
 
@@ -42,19 +56,19 @@ def get_tasks():
 def get_task(task_id):
     task = filter(lambda t:t['id']==task_id,tasks)
     if(len(task))==0:
-        return jsonify({'error':'Not Found'}),404
+        return jsonify({'error':'Not Found'})#,404
     return jsonify({'task':task[0]})
 
 
 @app.errorhandler(404)
 def not_found(error):
-    return jsonify({'error':'Not Found'}),404
+    return jsonify({'error':'Not Found'})#,404
 
 
 @app.route('/nilas/api/v1.0/tasks',methods =['POST'])
 def create_task():
     if not request.json or not 'title' in request.json:
-        return jsonify({'error':'Not Found'}),404
+        return jsonify({'error':'Not Found'})#,404
     task ={
         'id': tasks[-1]['id'] + 1 ,
         'title': request.json['title'],
@@ -63,7 +77,7 @@ def create_task():
         'done': False
     }
     tasks.append(task)
-    return jsonify({'task':task}),201
+    return jsonify({'task':task})#,201
 
 @app.route('/nilas/api/v1.0/tasks/<int:task_id>',methods = ['PUT'])
 def update_task(task_id):
